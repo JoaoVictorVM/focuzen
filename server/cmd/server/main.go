@@ -11,6 +11,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/JoaoVictorVM/focuzen/server/internal/cache"
 	"github.com/JoaoVictorVM/focuzen/server/internal/config"
 	"github.com/JoaoVictorVM/focuzen/server/internal/server"
 	"github.com/JoaoVictorVM/focuzen/server/internal/youtube"
@@ -34,7 +35,7 @@ func run() error {
 
 	addr := ":" + cfg.Port
 
-	searcher := youtube.NewClient(cfg.YouTubeAPIKey)
+	searcher := cache.NewSearcher(youtube.NewClient(cfg.YouTubeAPIKey), cfg.CacheSize, cfg.CacheTTL)
 
 	srv := &http.Server{
 		Addr:              addr,
