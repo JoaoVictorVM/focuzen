@@ -10,10 +10,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 
 	"github.com/JoaoVictorVM/focuzen/server/internal/handlers"
+	"github.com/JoaoVictorVM/focuzen/server/internal/youtube"
 )
 
 // New builds the HTTP handler with the base middleware stack and routes.
-func New(logger *slog.Logger) http.Handler {
+func New(logger *slog.Logger, searcher youtube.Searcher) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -22,6 +23,11 @@ func New(logger *slog.Logger) http.Handler {
 
 	r.Get("/healthz", handlers.Healthz)
 	r.Get("/readyz", handlers.Readyz)
+
+	searchHandler := handlers.NewSearchHandler(searcher)
+	r.Route("/api/v1", func(r chi.Router) {
+		r.Get("/search", searchHandler.Search)
+	})
 
 	return r
 }

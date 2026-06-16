@@ -13,6 +13,7 @@ import (
 
 	"github.com/JoaoVictorVM/focuzen/server/internal/config"
 	"github.com/JoaoVictorVM/focuzen/server/internal/server"
+	"github.com/JoaoVictorVM/focuzen/server/internal/youtube"
 )
 
 func main() {
@@ -33,9 +34,11 @@ func run() error {
 
 	addr := ":" + cfg.Port
 
+	searcher := youtube.NewClient(cfg.YouTubeAPIKey)
+
 	srv := &http.Server{
 		Addr:              addr,
-		Handler:           server.New(logger),
+		Handler:           server.New(logger, searcher),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
