@@ -38,8 +38,11 @@ func run() error {
 	searcher := cache.NewSearcher(youtube.NewClient(cfg.YouTubeAPIKey), cfg.CacheSize, cfg.CacheTTL)
 
 	srv := &http.Server{
-		Addr:              addr,
-		Handler:           server.New(logger, searcher),
+		Addr: addr,
+		Handler: server.New(logger, searcher, server.Options{
+			RateLimitRequests: cfg.RateLimitRequests,
+			RateLimitWindow:   cfg.RateLimitWindow,
+		}),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

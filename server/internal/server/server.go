@@ -7,25 +7,36 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
+	chimw "github.com/go-chi/chi/v5/middleware"
 
 	"github.com/JoaoVictorVM/focuzen/server/internal/handlers"
+	"github.com/JoaoVictorVM/focuzen/server/internal/middleware"
 	"github.com/JoaoVictorVM/focuzen/server/internal/youtube"
 )
 
+// Options carries the tunables the router needs from configuration.
+type Options struct {
+	RateLimitRequests int
+	RateLimitWindow   time.Duration
+}
+
 // New builds the HTTP handler with the base middleware stack and routes.
-func New(logger *slog.Logger, searcher youtube.Searcher) http.Handler {
+func New(logger *slog.Logger, searcher youtube.Searcher, opts Options) http.Handler {
 	r := chi.NewRouter()
 
-	r.Use(middleware.RequestID)
+	r.Use(middleware.SecurityHeaders)
+	r.Use(chimw.RequestID)
 	r.Use(requestLogger(logger))
-	r.Use(middleware.Recoverer)
+	r.Use(chimw.Recoverer)
 
+	// Health checks stay outside the rate limiter so platform probes are never
+	// throttled.
 	r.Get("/healthz", handlers.Healthz)
 	r.Get("/readyz", handlers.Readyz)
 
 	searchHandler := handlers.NewSearchHandler(searcher)
 	r.Route("/api/v1", func(r chi.Router) {
+		r.Use(middleware.RateLimitByIP(opts.RateLimitRequests, opts.RateLimitWindow))
 		r.Get("/search", searchHandler.Search)
 	})
 
@@ -38,7 +49,7 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
-			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
+			ww := chimw.NewWrapResponseWriter(w, r.ProtoMajor)
 
 			next.ServeHTTP(ww, r)
 
@@ -48,7 +59,7 @@ func requestLogger(logger *slog.Logger) func(http.Handler) http.Handler {
 				"status", ww.Status(),
 				"bytes", ww.BytesWritten(),
 				"duration_ms", time.Since(start).Milliseconds(),
-				"request_id", middleware.GetReqID(r.Context()),
+				"request_id", chimw.GetReqID(r.Context()),
 			)
 		})
 	}

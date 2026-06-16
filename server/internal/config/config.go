@@ -11,10 +11,12 @@ import (
 
 // Config holds the runtime configuration loaded from the environment.
 type Config struct {
-	Port          string
-	YouTubeAPIKey string
-	CacheSize     int
-	CacheTTL      time.Duration
+	Port              string
+	YouTubeAPIKey     string
+	CacheSize         int
+	CacheTTL          time.Duration
+	RateLimitRequests int
+	RateLimitWindow   time.Duration
 }
 
 // Load reads configuration from environment variables, applying defaults and
@@ -30,11 +32,23 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
+	rateLimitRequests, err := getenvInt("RATE_LIMIT_REQUESTS", 60)
+	if err != nil {
+		return Config{}, err
+	}
+
+	rateLimitWindow, err := getenvDuration("RATE_LIMIT_WINDOW", time.Minute)
+	if err != nil {
+		return Config{}, err
+	}
+
 	cfg := Config{
-		Port:          getenv("PORT", "8080"),
-		YouTubeAPIKey: os.Getenv("YOUTUBE_API_KEY"),
-		CacheSize:     cacheSize,
-		CacheTTL:      cacheTTL,
+		Port:              getenv("PORT", "8080"),
+		YouTubeAPIKey:     os.Getenv("YOUTUBE_API_KEY"),
+		CacheSize:         cacheSize,
+		CacheTTL:          cacheTTL,
+		RateLimitRequests: rateLimitRequests,
+		RateLimitWindow:   rateLimitWindow,
 	}
 
 	if cfg.YouTubeAPIKey == "" {

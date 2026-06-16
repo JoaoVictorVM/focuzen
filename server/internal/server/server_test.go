@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -20,7 +21,11 @@ func (stubSearcher) Search(context.Context, string) ([]youtube.Video, error) {
 }
 
 func TestRoutes(t *testing.T) {
-	handler := New(slog.New(slog.NewTextHandler(io.Discard, nil)), stubSearcher{})
+	handler := New(
+		slog.New(slog.NewTextHandler(io.Discard, nil)),
+		stubSearcher{},
+		Options{RateLimitRequests: 100, RateLimitWindow: time.Minute},
+	)
 
 	tests := []struct {
 		name       string
