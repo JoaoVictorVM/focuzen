@@ -8,7 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 
-	"github.com/jvmartinscv/focuzen/server/internal/handlers"
+	"github.com/JoaoVictorVM/focuzen/server/internal/handlers"
 )
 
 // New builds the HTTP handler with the base middleware stack and routes.

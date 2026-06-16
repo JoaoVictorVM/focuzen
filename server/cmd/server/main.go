@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jvmartinscv/focuzen/server/internal/server"
+	"github.com/JoaoVictorVM/focuzen/server/internal/server"
 )
 
 func main() {

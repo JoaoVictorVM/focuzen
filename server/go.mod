@@ -1,4 +1,4 @@
-module github.com/jvmartinscv/focuzen/server
+module github.com/JoaoVictorVM/focuzen/server
 
 go 1.26
 
