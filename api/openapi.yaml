@@ -1,0 +1,163 @@
+openapi: 3.1.0
+info:
+  title: Focuzen API
+  description: |
+    Backend da tela de foco do Focuzen. Atua como proxy stateless da busca no
+    YouTube (escondendo a chave da API) e expõe health checks. Não há contas de
+    usuário nem banco de dados.
+  version: 1.0.0
+  license:
+    name: MIT
+    identifier: MIT
+
+servers:
+  - url: /
+    description: Mesma origem (a SPA é servida pelo próprio binário em produção)
+  - url: http://localhost:8080
+    description: Desenvolvimento local
+
+tags:
+  - name: search
+    description: Busca de vídeos no YouTube
+  - name: health
+    description: Liveness e readiness
+
+# A API é um proxy público stateless: sem contas, sem autenticação (PRD §1).
+security: []
+
+paths:
+  /api/v1/search:
+    get:
+      tags: [search]
+      summary: Busca vídeos no YouTube
+      description: |
+        Faz proxy de uma busca para a YouTube Data API v3. As respostas passam
+        por um cache LRU em memória e a rota é protegida por rate limiting por IP.
+      operationId: searchVideos
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Termo de busca (após `trim`, não pode ser vazio).
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+          example: lofi music
+      responses:
+        "200":
+          description: Resultados da busca.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResults"
+        "400":
+          description: Parâmetro `q` ausente, em branco ou longo demais.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "query parameter 'q' is required"
+        "429":
+          description: Rate limit por IP excedido.
+          headers:
+            Retry-After:
+              description: Segundos a aguardar antes de tentar novamente.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "rate limit exceeded"
+        "502":
+          description: Falha ao consultar o YouTube (erro do upstream).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "search failed"
+
+  /healthz:
+    get:
+      tags: [health]
+      summary: Liveness
+      operationId: healthz
+      responses:
+        "200":
+          description: Processo vivo.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              example:
+                status: ok
+
+  /readyz:
+    get:
+      tags: [health]
+      summary: Readiness
+      operationId: readyz
+      responses:
+        "200":
+          description: Pronto para receber tráfego.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Health"
+              example:
+                status: ready
+
+components:
+  schemas:
+    Video:
+      type: object
+      description: Um resultado de busca, reduzido aos campos que o frontend usa.
+      properties:
+        id:
+          type: string
+          description: ID do vídeo no YouTube.
+          example: dQw4w9WgXcQ
+        title:
+          type: string
+          example: lofi hip hop radio
+        channelTitle:
+          type: string
+          example: Lofi Girl
+        thumbnailUrl:
+          type: string
+          format: uri
+          example: https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg
+      required: [id, title, channelTitle, thumbnailUrl]
+      additionalProperties: false
+
+    SearchResults:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/Video"
+      required: [results]
+      additionalProperties: false
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ok, ready]
+      required: [status]
+      additionalProperties: false
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro legível.
+      required: [error]
+      additionalProperties: false

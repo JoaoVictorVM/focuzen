@@ -1,0 +1,9 @@
+apis:
+  focuzen@v1:
+    root: api/openapi.yaml
+
+rules:
+  # Dev server aponta para localhost de propósito (em produção a SPA é mesma origem).
+  no-server-example.com: off
+  # Health checks (/healthz, /readyz) só retornam 200 — não há resposta 4xx a documentar.
+  operation-4xx-response: off
