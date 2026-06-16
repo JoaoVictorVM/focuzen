@@ -1,0 +1,8 @@
+/* Design tokens as CSS variables, consumed by Tailwind. Single source of truth
+   for colors; the dark theme (added later) overrides these under .dark. */
+:root {
+  --color-background: #f3f3f3;
+  --color-foreground: #1a1a1a;
+  --color-primary: #969696;
+  --color-muted: #969696;
+}
