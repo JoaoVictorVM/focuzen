@@ -1,3 +1,4 @@
+// Command server runs the Focuzen backend HTTP server.
 package main
 
 import (
@@ -14,6 +15,13 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		slog.Error("server exited with error", "err", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	slog.SetDefault(logger)
 
@@ -28,24 +36,26 @@ func main() {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
+	serverErr := make(chan error, 1)
 	go func() {
 		logger.Info("server starting", "addr", addr)
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Error("server failed", "err", err)
-			os.Exit(1)
+			serverErr <- err
 		}
 	}()
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
-	<-ctx.Done()
+
+	select {
+	case err := <-serverErr:
+		return err
+	case <-ctx.Done():
+	}
 
 	logger.Info("server shutting down")
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := srv.Shutdown(shutdownCtx); err != nil {
-		logger.Error("graceful shutdown failed", "err", err)
-		os.Exit(1)
-	}
+	return srv.Shutdown(shutdownCtx)
 }

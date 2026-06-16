@@ -1,3 +1,4 @@
+// Package server wires the chi router, the base middleware stack and routes.
 package server
 
 import (
@@ -16,7 +17,6 @@ func New(logger *slog.Logger) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
 	r.Use(requestLogger(logger))
 	r.Use(middleware.Recoverer)
 
