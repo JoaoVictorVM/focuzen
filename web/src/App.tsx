@@ -1,10 +1,11 @@
-import { useTranslation } from 'react-i18next';
-
+import { Clock } from './components/Clock';
+import { DateDisplay } from './components/DateDisplay';
 import { LanguageToggle } from './components/LanguageToggle';
 import { ThemeToggle } from './components/ThemeToggle';
+import { useNow } from './hooks/useNow';
 
 export default function App() {
-  const { t } = useTranslation();
+  const now = useNow();
 
   return (
     <main className="relative flex min-h-screen items-center justify-center bg-background text-foreground">
@@ -13,8 +14,8 @@ export default function App() {
         <ThemeToggle />
       </div>
       <div className="text-center">
-        <h1 className="text-3xl font-light tracking-wide text-primary">{t('app.title')}</h1>
-        <p className="mt-2 text-muted">{t('app.tagline')}</p>
+        <Clock now={now} />
+        <DateDisplay now={now} />
       </div>
     </main>
   );
