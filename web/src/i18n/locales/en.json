@@ -1,12 +1,18 @@
 {
   "app": {
-    "title": "Focuzen",
-    "tagline": "Focus on what matters."
+    "title": "Focuzen"
+  },
+  "search": {
+    "placeholder": "Search for music…",
+    "label": "Search"
   },
   "language": {
     "label": "Language"
   },
   "theme": {
     "toggle": "Toggle theme"
+  },
+  "footer": {
+    "download": "Download the CLI"
   }
 }
