@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../hooks/useTheme';
+import { MoonIcon, SunIcon } from './icons';
 
 export function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
@@ -13,9 +14,13 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={t('theme.toggle')}
       aria-pressed={isDark}
-      className="rounded px-2 py-1 text-muted transition-colors hover:text-foreground"
+      className="rounded p-1 text-muted transition-colors hover:text-foreground"
     >
-      <span aria-hidden="true">{isDark ? '☀' : '☾'}</span>
+      {isDark ? (
+        <SunIcon size={18} strokeWidth={1.5} />
+      ) : (
+        <MoonIcon size={18} strokeWidth={1.5} />
+      )}
     </button>
   );
 }
