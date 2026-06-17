@@ -8,7 +8,7 @@ import ptBR from './locales/pt-BR.json';
 export const supportedLanguages = ['pt-BR', 'en'] as const;
 export type SupportedLanguage = (typeof supportedLanguages)[number];
 
-void i18n
+export const i18nReady = i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
