@@ -6,3 +6,10 @@
   --color-primary: #969696;
   --color-muted: #969696;
 }
+
+.dark {
+  --color-background: #1a1a1a;
+  --color-foreground: #f3f3f3;
+  --color-primary: #969696;
+  --color-muted: #6e6e6e;
+}
