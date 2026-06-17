@@ -1,10 +1,15 @@
 import { useTranslation } from 'react-i18next';
 
+import type { Video } from '../types/youtube';
 import { LanguageToggle } from './LanguageToggle';
 import { SearchBar } from './SearchBar';
 import { ThemeToggle } from './ThemeToggle';
 
-export function Header() {
+type HeaderProps = {
+  onSearchSelect: (video: Video) => void;
+};
+
+export function Header({ onSearchSelect }: HeaderProps) {
   const { t } = useTranslation();
 
   return (
@@ -16,7 +21,7 @@ export function Header() {
       </span>
 
       <div className="flex flex-1 justify-center">
-        <SearchBar />
+        <SearchBar onSelect={onSearchSelect} />
       </div>
 
       <div className="flex items-center gap-2">

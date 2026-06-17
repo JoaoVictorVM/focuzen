@@ -15,6 +15,11 @@
   "theme": {
     "toggle": "Alternar tema"
   },
+  "player": {
+    "play": "Tocar",
+    "pause": "Pausar",
+    "volume": "Volume"
+  },
   "footer": {
     "download": "Baixar a CLI"
   }
