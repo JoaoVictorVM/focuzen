@@ -6,7 +6,7 @@ import { SearchBar } from './SearchBar';
 import { ThemeToggle } from './ThemeToggle';
 
 type HeaderProps = {
-  onSearchSelect: (video: Video) => void;
+  onSearchSelect: (video: Video, queue: Video[]) => void;
 };
 
 export function Header({ onSearchSelect }: HeaderProps) {

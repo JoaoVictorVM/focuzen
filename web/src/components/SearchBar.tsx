@@ -7,7 +7,7 @@ import { SearchIcon } from './icons';
 import { ResultsDropdown } from './ResultsDropdown';
 
 type SearchBarProps = {
-  onSelect?: (video: Video) => void;
+  onSelect?: (video: Video, queue: Video[]) => void;
 };
 
 export function SearchBar({ onSelect }: SearchBarProps) {
@@ -60,7 +60,7 @@ export function SearchBar({ onSelect }: SearchBarProps) {
           status={status}
           results={results}
           onSelect={(video) => {
-            onSelect?.(video);
+            onSelect?.(video, results);
             setOpen(false);
           }}
         />

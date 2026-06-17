@@ -1,8 +1,5 @@
 import type { SVGProps } from 'react';
 
-// Inline SVG icons in the Lucide style (https://lucide.dev, ISC License). We
-// only need a couple of icons, so we inline their paths instead of depending on
-// the full icon package — same look, smaller bundle.
 export type IconProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
@@ -69,6 +66,15 @@ export function PauseIcon(props: IconProps) {
     <svg {...baseProps(props)}>
       <rect x="14" y="4" width="4" height="16" rx="1" />
       <rect x="6" y="4" width="4" height="16" rx="1" />
+    </svg>
+  );
+}
+
+export function NextIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <polygon points="5 4 15 12 5 20 5 4" />
+      <line x1="19" x2="19" y1="5" y2="19" />
     </svg>
   );
 }

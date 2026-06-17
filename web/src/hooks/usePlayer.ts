@@ -5,19 +5,36 @@ import type { Video } from '../types/youtube';
 
 const DEFAULT_VOLUME = 70;
 
-// usePlayer owns a single hidden YouTube IFrame player. The video is hidden via
-// CSS (see AudioPlayer) so only the audio is heard. It lazily creates the player
-// on the first play and reuses it (loadVideoById) afterwards.
+// usePlayer owns a single hidden YouTube IFrame player plus a local play queue.
+// "Next" advances within this queue (the search results), not via YouTube
+// recommendations — the API no longer exposes related videos (see ADR-0006).
 export function usePlayer() {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<YT.Player | null>(null);
-  const [current, setCurrent] = useState<Video | null>(null);
+  const [queue, setQueue] = useState<Video[]>([]);
+  const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
+
+  const current = queue[index] ?? null;
+  const hasNext = index < queue.length - 1;
 
   // Keep the latest volume readable from onReady without re-creating the player.
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
+
+  // playNextRef always points at the current advance logic so the player's
+  // onStateChange handler (created once) can auto-advance on ENDED.
+  const playNextRef = useRef<() => void>(() => {});
+  useEffect(() => {
+    playNextRef.current = () => {
+      if (index + 1 < queue.length) {
+        const nextIndex = index + 1;
+        setIndex(nextIndex);
+        playerRef.current?.loadVideoById(queue[nextIndex].id);
+      }
+    };
+  }, [index, queue]);
 
   useEffect(() => {
     return () => {
@@ -26,11 +43,9 @@ export function usePlayer() {
     };
   }, []);
 
-  const play = useCallback((video: Video) => {
-    setCurrent(video);
-
+  const loadOrCreate = useCallback((videoId: string) => {
     if (playerRef.current) {
-      playerRef.current.loadVideoById(video.id);
+      playerRef.current.loadVideoById(videoId);
       return;
     }
 
@@ -39,7 +54,7 @@ export function usePlayer() {
         return;
       }
       playerRef.current = new api.Player(containerRef.current, {
-        videoId: video.id,
+        videoId,
         playerVars: { autoplay: 1, controls: 0, disablekb: 1, playsinline: 1 },
         events: {
           onReady: (event) => {
@@ -48,10 +63,30 @@ export function usePlayer() {
           },
           onStateChange: (event) => {
             setIsPlaying(event.data === api.PlayerState.PLAYING);
+            if (event.data === api.PlayerState.ENDED) {
+              playNextRef.current();
+            }
           },
         },
       });
     });
+  }, []);
+
+  const play = useCallback(
+    (video: Video, list?: Video[]) => {
+      const nextQueue = list && list.length > 0 ? list : [video];
+      const found = nextQueue.findIndex((item) => item.id === video.id);
+      const startIndex = found >= 0 ? found : 0;
+
+      setQueue(nextQueue);
+      setIndex(startIndex);
+      loadOrCreate(nextQueue[startIndex].id);
+    },
+    [loadOrCreate],
+  );
+
+  const next = useCallback(() => {
+    playNextRef.current();
   }, []);
 
   const togglePlay = useCallback(() => {
@@ -71,5 +106,15 @@ export function usePlayer() {
     playerRef.current?.setVolume(value);
   }, []);
 
-  return { containerRef, current, isPlaying, volume, play, togglePlay, changeVolume } as const;
+  return {
+    containerRef,
+    current,
+    isPlaying,
+    volume,
+    hasNext,
+    play,
+    next,
+    togglePlay,
+    changeVolume,
+  } as const;
 }

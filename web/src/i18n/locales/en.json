@@ -18,6 +18,7 @@
   "player": {
     "play": "Play",
     "pause": "Pause",
+    "next": "Next",
     "volume": "Volume"
   },
   "footer": {

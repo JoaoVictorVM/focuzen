@@ -4,8 +4,6 @@ type AudioPlayerProps = {
   containerRef: RefObject<HTMLDivElement | null>;
 };
 
-// Mount point for the YouTube IFrame player. The API replaces the inner div with
-// an iframe; the wrapper keeps it off-screen and inert so only the audio plays.
 export function AudioPlayer({ containerRef }: AudioPlayerProps) {
   return (
     <div

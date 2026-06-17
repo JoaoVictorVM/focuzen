@@ -1,13 +1,15 @@
 import { useTranslation } from 'react-i18next';
 
 import type { Video } from '../types/youtube';
-import { PauseIcon, PlayIcon, VolumeIcon } from './icons';
+import { NextIcon, PauseIcon, PlayIcon, VolumeIcon } from './icons';
 
 type AudioControlsProps = {
   current: Video | null;
   isPlaying: boolean;
   volume: number;
+  hasNext: boolean;
   onTogglePlay: () => void;
+  onNext: () => void;
   onVolumeChange: (value: number) => void;
 };
 
@@ -15,7 +17,9 @@ export function AudioControls({
   current,
   isPlaying,
   volume,
+  hasNext,
   onTogglePlay,
+  onNext,
   onVolumeChange,
 }: AudioControlsProps) {
   const { t } = useTranslation();
@@ -38,6 +42,16 @@ export function AudioControls({
         ) : (
           <PlayIcon size={20} strokeWidth={1.5} />
         )}
+      </button>
+
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={!hasNext}
+        aria-label={t('player.next')}
+        className="rounded-full p-2 text-foreground transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+      >
+        <NextIcon size={18} strokeWidth={1.5} />
       </button>
 
       <span className="max-w-[16rem] truncate text-sm text-muted" title={current.title}>
