@@ -12,6 +12,10 @@ export default {
         foreground: 'var(--color-foreground)',
         primary: 'var(--color-primary)',
         muted: 'var(--color-muted)',
+        accent: 'var(--color-accent)',
+      },
+      fontFamily: {
+        script: ['"Segoe Script"', '"Bradley Hand"', '"Brush Script MT"', 'cursive'],
       },
     },
   },
