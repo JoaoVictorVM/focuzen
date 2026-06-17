@@ -25,6 +25,7 @@ func TestRoutes(t *testing.T) {
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 		stubSearcher{},
 		Options{RateLimitRequests: 100, RateLimitWindow: time.Minute},
+		nil,
 	)
 
 	tests := []struct {

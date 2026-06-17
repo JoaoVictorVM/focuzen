@@ -20,8 +20,9 @@ type Options struct {
 	RateLimitWindow   time.Duration
 }
 
-// New builds the HTTP handler with the base middleware stack and routes.
-func New(logger *slog.Logger, searcher youtube.Searcher, opts Options) http.Handler {
+// New builds the HTTP handler with the base middleware stack and routes. The spa
+// handler, when non-nil, serves the embedded frontend on any non-API path.
+func New(logger *slog.Logger, searcher youtube.Searcher, opts Options, spa http.Handler) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.SecurityHeaders)
@@ -39,6 +40,10 @@ func New(logger *slog.Logger, searcher youtube.Searcher, opts Options) http.Hand
 		r.Use(middleware.RateLimitByIP(opts.RateLimitRequests, opts.RateLimitWindow))
 		r.Get("/search", searchHandler.Search)
 	})
+
+	if spa != nil {
+		r.Handle("/*", spa)
+	}
 
 	return r
 }

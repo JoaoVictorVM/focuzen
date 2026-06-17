@@ -14,6 +14,7 @@ import (
 	"github.com/JoaoVictorVM/focuzen/server/internal/cache"
 	"github.com/JoaoVictorVM/focuzen/server/internal/config"
 	"github.com/JoaoVictorVM/focuzen/server/internal/server"
+	"github.com/JoaoVictorVM/focuzen/server/internal/webui"
 	"github.com/JoaoVictorVM/focuzen/server/internal/youtube"
 )
 
@@ -37,12 +38,17 @@ func run() error {
 
 	searcher := cache.NewSearcher(youtube.NewClient(cfg.YouTubeAPIKey), cfg.CacheSize, cfg.CacheTTL)
 
+	spa, err := webui.Handler()
+	if err != nil {
+		return err
+	}
+
 	srv := &http.Server{
 		Addr: addr,
 		Handler: server.New(logger, searcher, server.Options{
 			RateLimitRequests: cfg.RateLimitRequests,
 			RateLimitWindow:   cfg.RateLimitWindow,
-		}),
+		}, spa),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
