@@ -4,7 +4,10 @@
   },
   "search": {
     "placeholder": "Buscar música…",
-    "label": "Buscar"
+    "label": "Buscar",
+    "loading": "Buscando…",
+    "error": "Falha na busca. Tente de novo.",
+    "empty": "Nenhum resultado."
   },
   "language": {
     "label": "Idioma"
