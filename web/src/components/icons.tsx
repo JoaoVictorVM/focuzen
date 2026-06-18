@@ -79,6 +79,15 @@ export function NextIcon(props: IconProps) {
   );
 }
 
+export function PreviousIcon(props: IconProps) {
+  return (
+    <svg {...baseProps(props)}>
+      <polygon points="19 20 9 12 19 4 19 20" />
+      <line x1="5" x2="5" y1="19" y2="5" />
+    </svg>
+  );
+}
+
 export function VolumeIcon(props: IconProps) {
   return (
     <svg {...baseProps(props)}>

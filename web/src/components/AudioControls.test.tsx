@@ -19,8 +19,10 @@ function renderControls(overrides: Partial<Parameters<typeof AudioControls>[0]> 
     isPlaying: false,
     volume: 70,
     hasNext: true,
+    hasPrevious: true,
     onTogglePlay: vi.fn(),
     onNext: vi.fn(),
+    onPrevious: vi.fn(),
     onVolumeChange: vi.fn(),
     ...overrides,
   };
@@ -40,8 +42,10 @@ describe('AudioControls', () => {
         isPlaying={false}
         volume={70}
         hasNext={false}
+        hasPrevious={false}
         onTogglePlay={vi.fn()}
         onNext={vi.fn()}
+        onPrevious={vi.fn()}
         onVolumeChange={vi.fn()}
       />,
     );
@@ -64,6 +68,17 @@ describe('AudioControls', () => {
   it('disables Next at the end of the queue', () => {
     renderControls({ hasNext: false });
     expect(screen.getByRole('button', { name: 'Next' })).toBeDisabled();
+  });
+
+  it('goes to the previous track and disables Previous at the start', async () => {
+    const props = renderControls({ hasPrevious: true });
+    await userEvent.click(screen.getByRole('button', { name: 'Previous' }));
+    expect(props.onPrevious).toHaveBeenCalledOnce();
+  });
+
+  it('disables Previous at the start of the queue', () => {
+    renderControls({ hasPrevious: false });
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
   });
 
   it('reports volume changes', () => {

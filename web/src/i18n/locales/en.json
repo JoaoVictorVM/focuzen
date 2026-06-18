@@ -19,6 +19,7 @@
     "play": "Play",
     "pause": "Pause",
     "next": "Next",
+    "previous": "Previous",
     "volume": "Volume"
   },
   "footer": {

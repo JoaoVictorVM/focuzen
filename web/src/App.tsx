@@ -23,8 +23,10 @@ export default function App() {
             isPlaying={player.isPlaying}
             volume={player.volume}
             hasNext={player.hasNext}
+            hasPrevious={player.hasPrevious}
             onTogglePlay={player.togglePlay}
             onNext={player.next}
+            onPrevious={player.previous}
             onVolumeChange={player.changeVolume}
           />
         </div>

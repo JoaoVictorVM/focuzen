@@ -18,6 +18,7 @@ export function usePlayer() {
 
   const current = queue[index] ?? null;
   const hasNext = index < queue.length - 1;
+  const hasPrevious = index > 0;
 
   // Keep the latest volume readable from onReady without re-creating the player.
   const volumeRef = useRef(volume);
@@ -89,6 +90,14 @@ export function usePlayer() {
     playNextRef.current();
   }, []);
 
+  const previous = useCallback(() => {
+    if (index > 0) {
+      const previousIndex = index - 1;
+      setIndex(previousIndex);
+      playerRef.current?.loadVideoById(queue[previousIndex].id);
+    }
+  }, [index, queue]);
+
   const togglePlay = useCallback(() => {
     const player = playerRef.current;
     if (!player) {
@@ -112,8 +121,10 @@ export function usePlayer() {
     isPlaying,
     volume,
     hasNext,
+    hasPrevious,
     play,
     next,
+    previous,
     togglePlay,
     changeVolume,
   } as const;

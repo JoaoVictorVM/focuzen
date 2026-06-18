@@ -1,15 +1,17 @@
 import { useTranslation } from 'react-i18next';
 
 import type { Video } from '../types/youtube';
-import { NextIcon, PauseIcon, PlayIcon, VolumeIcon } from './icons';
+import { NextIcon, PauseIcon, PlayIcon, PreviousIcon, VolumeIcon } from './icons';
 
 type AudioControlsProps = {
   current: Video | null;
   isPlaying: boolean;
   volume: number;
   hasNext: boolean;
+  hasPrevious: boolean;
   onTogglePlay: () => void;
   onNext: () => void;
+  onPrevious: () => void;
   onVolumeChange: (value: number) => void;
 };
 
@@ -18,8 +20,10 @@ export function AudioControls({
   isPlaying,
   volume,
   hasNext,
+  hasPrevious,
   onTogglePlay,
   onNext,
+  onPrevious,
   onVolumeChange,
 }: AudioControlsProps) {
   const { t } = useTranslation();
@@ -35,6 +39,16 @@ export function AudioControls({
       </span>
 
       <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onPrevious}
+          disabled={!hasPrevious}
+          aria-label={t('player.previous')}
+          className="rounded-full p-2 text-foreground transition-colors hover:text-primary disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          <PreviousIcon size={18} strokeWidth={1.5} />
+        </button>
+
         <button
           type="button"
           onClick={onTogglePlay}

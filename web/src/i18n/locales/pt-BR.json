@@ -19,6 +19,7 @@
     "play": "Tocar",
     "pause": "Pausar",
     "next": "Próximo",
+    "previous": "Anterior",
     "volume": "Volume"
   },
   "footer": {
