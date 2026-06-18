@@ -1,17 +1,20 @@
 import { useTranslation } from 'react-i18next';
 
 import type { Video } from '../types/youtube';
-import { NextIcon, PauseIcon, PlayIcon, PreviousIcon, VolumeIcon } from './icons';
+import { NextIcon, PauseIcon, PlayIcon, PreviousIcon, RepeatIcon, VolumeIcon } from './icons';
+import { Tooltip } from './Tooltip';
 
 type AudioControlsProps = {
   current: Video | null;
   isPlaying: boolean;
   volume: number;
+  repeat: boolean;
   hasNext: boolean;
   hasPrevious: boolean;
   onTogglePlay: () => void;
   onNext: () => void;
   onPrevious: () => void;
+  onToggleRepeat: () => void;
   onVolumeChange: (value: number) => void;
 };
 
@@ -19,11 +22,13 @@ export function AudioControls({
   current,
   isPlaying,
   volume,
+  repeat,
   hasNext,
   hasPrevious,
   onTogglePlay,
   onNext,
   onPrevious,
+  onToggleRepeat,
   onVolumeChange,
 }: AudioControlsProps) {
   const { t } = useTranslation();
@@ -72,6 +77,20 @@ export function AudioControls({
         >
           <NextIcon size={18} strokeWidth={1.5} />
         </button>
+
+        <Tooltip label={repeat ? t('player.repeatOn') : t('player.repeatOff')}>
+          <button
+            type="button"
+            onClick={onToggleRepeat}
+            aria-label={t('player.repeat')}
+            aria-pressed={repeat}
+            className={`rounded-full p-2 transition-colors ${
+              repeat ? 'text-primary' : 'text-foreground hover:text-primary'
+            }`}
+          >
+            <RepeatIcon size={18} strokeWidth={1.5} />
+          </button>
+        </Tooltip>
 
         <span className="flex items-center gap-2">
           <VolumeIcon size={16} strokeWidth={1.5} className="text-muted" />

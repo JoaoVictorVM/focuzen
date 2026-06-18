@@ -15,6 +15,7 @@ export function usePlayer() {
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [repeat, setRepeat] = useState(false);
 
   const current = queue[index] ?? null;
   const hasNext = index < queue.length - 1;
@@ -23,6 +24,13 @@ export function usePlayer() {
   // Keep the latest volume readable from onReady without re-creating the player.
   const volumeRef = useRef(volume);
   volumeRef.current = volume;
+
+  // Read inside the once-created onStateChange handler to decide what to do when
+  // a track ends.
+  const repeatRef = useRef(repeat);
+  repeatRef.current = repeat;
+  const currentIdRef = useRef<string | null>(current?.id ?? null);
+  currentIdRef.current = current?.id ?? null;
 
   // playNextRef always points at the current advance logic so the player's
   // onStateChange handler (created once) can auto-advance on ENDED.
@@ -65,7 +73,11 @@ export function usePlayer() {
           onStateChange: (event) => {
             setIsPlaying(event.data === api.PlayerState.PLAYING);
             if (event.data === api.PlayerState.ENDED) {
-              playNextRef.current();
+              if (repeatRef.current && currentIdRef.current) {
+                event.target.loadVideoById(currentIdRef.current);
+              } else {
+                playNextRef.current();
+              }
             }
           },
         },
@@ -115,17 +127,23 @@ export function usePlayer() {
     playerRef.current?.setVolume(value);
   }, []);
 
+  const toggleRepeat = useCallback(() => {
+    setRepeat((value) => !value);
+  }, []);
+
   return {
     containerRef,
     current,
     isPlaying,
     volume,
+    repeat,
     hasNext,
     hasPrevious,
     play,
     next,
     previous,
     togglePlay,
+    toggleRepeat,
     changeVolume,
   } as const;
 }

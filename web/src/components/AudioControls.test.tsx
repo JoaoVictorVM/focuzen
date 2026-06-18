@@ -18,11 +18,13 @@ function renderControls(overrides: Partial<Parameters<typeof AudioControls>[0]> 
     current: video,
     isPlaying: false,
     volume: 70,
+    repeat: false,
     hasNext: true,
     hasPrevious: true,
     onTogglePlay: vi.fn(),
     onNext: vi.fn(),
     onPrevious: vi.fn(),
+    onToggleRepeat: vi.fn(),
     onVolumeChange: vi.fn(),
     ...overrides,
   };
@@ -41,11 +43,13 @@ describe('AudioControls', () => {
         current={null}
         isPlaying={false}
         volume={70}
+        repeat={false}
         hasNext={false}
         hasPrevious={false}
         onTogglePlay={vi.fn()}
         onNext={vi.fn()}
         onPrevious={vi.fn()}
+        onToggleRepeat={vi.fn()}
         onVolumeChange={vi.fn()}
       />,
     );
@@ -79,6 +83,22 @@ describe('AudioControls', () => {
   it('disables Previous at the start of the queue', () => {
     renderControls({ hasPrevious: false });
     expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled();
+  });
+
+  it('toggles repeat, reflects its pressed state and shows a state tooltip', async () => {
+    const props = renderControls({ repeat: true });
+
+    const repeatButton = screen.getByRole('button', { name: 'Repeat' });
+    expect(repeatButton).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Repeat on');
+
+    await userEvent.click(repeatButton);
+    expect(props.onToggleRepeat).toHaveBeenCalledOnce();
+  });
+
+  it('shows the off tooltip when repeat is inactive', () => {
+    renderControls({ repeat: false });
+    expect(screen.getByRole('tooltip')).toHaveTextContent('Repeat off');
   });
 
   it('reports volume changes', () => {

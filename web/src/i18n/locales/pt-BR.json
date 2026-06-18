@@ -20,6 +20,9 @@
     "pause": "Pausar",
     "next": "Próximo",
     "previous": "Anterior",
+    "repeat": "Repetir",
+    "repeatOn": "Repetição ativada",
+    "repeatOff": "Repetição desativada",
     "volume": "Volume"
   },
   "footer": {
