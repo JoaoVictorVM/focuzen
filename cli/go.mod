@@ -3,10 +3,13 @@ module github.com/JoaoVictorVM/focuzen/cli
 go 1.26
 
 require (
+	github.com/BurntSushi/toml v1.6.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/gopxl/beep/v2 v2.1.1
+	github.com/nicksnyder/go-i18n/v2 v2.6.1
 	github.com/stretchr/testify v1.11.1
+	golang.org/x/text v0.32.0
 )
 
 require (
@@ -32,6 +35,5 @@ require (
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

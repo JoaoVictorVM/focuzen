@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 
 	"github.com/JoaoVictorVM/focuzen/cli/internal/audio"
+	"github.com/JoaoVictorVM/focuzen/cli/internal/i18n"
 )
 
 type tickMsg time.Time
@@ -24,15 +25,17 @@ type Model struct {
 	cursor        int
 	selected      int
 	player        audio.Player
+	tr            *i18n.Translator
 	err           error
 }
 
 // New returns the initial model with no audio selected.
-func New(player audio.Player) Model {
+func New(player audio.Player, tr *i18n.Translator) Model {
 	return Model{
 		now:      time.Now(),
 		selected: len(stations) - 1,
 		player:   player,
+		tr:       tr,
 	}
 }
 
@@ -99,14 +102,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 // View renders the styled clock and radio menu, centered in the terminal.
 func (m Model) View() string {
 	sections := []string{
-		clockStyle.Render(m.now.Format("15:04:05")),
+		clockStyle.Render(m.now.Format(m.tr.T("timeFormat"))),
 		"",
 		m.renderMenu(),
 		"",
-		hintStyle.Render("↑/↓ choose · enter select · q quit"),
+		hintStyle.Render(m.tr.T("hint")),
 	}
 	if m.err != nil {
-		sections = append(sections, hintStyle.Render("could not play audio"))
+		sections = append(sections, hintStyle.Render(m.tr.T("playbackError")))
 	}
 
 	content := lipgloss.JoinVertical(lipgloss.Center, sections...)

@@ -1,0 +1,4 @@
+timeFormat = "15:04:05"
+noAudio = "Sem áudio"
+hint = "↑/↓ escolher · enter selecionar · q sair"
+playbackError = "Não foi possível tocar o áudio"
