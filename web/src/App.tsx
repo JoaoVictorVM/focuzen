@@ -4,12 +4,14 @@ import { Clock } from './components/Clock';
 import { DateDisplay } from './components/DateDisplay';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
+import { useFullscreen } from './hooks/useFullscreen';
 import { useNow } from './hooks/useNow';
 import { usePlayer } from './hooks/usePlayer';
 
 export default function App() {
   const now = useNow();
   const player = usePlayer();
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -25,10 +27,12 @@ export default function App() {
             repeat={player.repeat}
             hasNext={player.hasNext}
             hasPrevious={player.hasPrevious}
+            isFullscreen={isFullscreen}
             onTogglePlay={player.togglePlay}
             onNext={player.next}
             onPrevious={player.previous}
             onToggleRepeat={player.toggleRepeat}
+            onToggleFullscreen={toggleFullscreen}
             onVolumeChange={player.changeVolume}
           />
         </div>

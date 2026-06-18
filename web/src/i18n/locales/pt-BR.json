@@ -23,6 +23,8 @@
     "repeat": "Repetir",
     "repeatOn": "Repetição ativada",
     "repeatOff": "Repetição desativada",
+    "enterFullscreen": "Tela cheia",
+    "exitFullscreen": "Sair da tela cheia",
     "volume": "Volume"
   },
   "footer": {

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -21,10 +21,12 @@ function renderControls(overrides: Partial<Parameters<typeof AudioControls>[0]> 
     repeat: false,
     hasNext: true,
     hasPrevious: true,
+    isFullscreen: false,
     onTogglePlay: vi.fn(),
     onNext: vi.fn(),
     onPrevious: vi.fn(),
     onToggleRepeat: vi.fn(),
+    onToggleFullscreen: vi.fn(),
     onVolumeChange: vi.fn(),
     ...overrides,
   };
@@ -46,10 +48,12 @@ describe('AudioControls', () => {
         repeat={false}
         hasNext={false}
         hasPrevious={false}
+        isFullscreen={false}
         onTogglePlay={vi.fn()}
         onNext={vi.fn()}
         onPrevious={vi.fn()}
         onToggleRepeat={vi.fn()}
+        onToggleFullscreen={vi.fn()}
         onVolumeChange={vi.fn()}
       />,
     );
@@ -99,6 +103,17 @@ describe('AudioControls', () => {
   it('shows the off tooltip when repeat is inactive', () => {
     renderControls({ repeat: false });
     expect(screen.getByRole('tooltip')).toHaveTextContent('Repeat off');
+  });
+
+  it('toggles fullscreen and reflects its state', async () => {
+    const enter = renderControls({ isFullscreen: false });
+    await userEvent.click(screen.getByRole('button', { name: 'Fullscreen' }));
+    expect(enter.onToggleFullscreen).toHaveBeenCalledOnce();
+
+    cleanup();
+
+    renderControls({ isFullscreen: true });
+    expect(screen.getByRole('button', { name: 'Exit fullscreen' })).toBeInTheDocument();
   });
 
   it('reports volume changes', () => {

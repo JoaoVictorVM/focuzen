@@ -23,6 +23,8 @@
     "repeat": "Repeat",
     "repeatOn": "Repeat on",
     "repeatOff": "Repeat off",
+    "enterFullscreen": "Fullscreen",
+    "exitFullscreen": "Exit fullscreen",
     "volume": "Volume"
   },
   "footer": {

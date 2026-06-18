@@ -1,7 +1,16 @@
 import { useTranslation } from 'react-i18next';
 
 import type { Video } from '../types/youtube';
-import { NextIcon, PauseIcon, PlayIcon, PreviousIcon, RepeatIcon, VolumeIcon } from './icons';
+import {
+  MaximizeIcon,
+  MinimizeIcon,
+  NextIcon,
+  PauseIcon,
+  PlayIcon,
+  PreviousIcon,
+  RepeatIcon,
+  VolumeIcon,
+} from './icons';
 import { Tooltip } from './Tooltip';
 
 type AudioControlsProps = {
@@ -11,10 +20,12 @@ type AudioControlsProps = {
   repeat: boolean;
   hasNext: boolean;
   hasPrevious: boolean;
+  isFullscreen: boolean;
   onTogglePlay: () => void;
   onNext: () => void;
   onPrevious: () => void;
   onToggleRepeat: () => void;
+  onToggleFullscreen: () => void;
   onVolumeChange: (value: number) => void;
 };
 
@@ -25,10 +36,12 @@ export function AudioControls({
   repeat,
   hasNext,
   hasPrevious,
+  isFullscreen,
   onTogglePlay,
   onNext,
   onPrevious,
   onToggleRepeat,
+  onToggleFullscreen,
   onVolumeChange,
 }: AudioControlsProps) {
   const { t } = useTranslation();
@@ -104,6 +117,20 @@ export function AudioControls({
             className="h-1 w-24 cursor-pointer accent-primary"
           />
         </span>
+
+        <button
+          type="button"
+          onClick={onToggleFullscreen}
+          aria-label={isFullscreen ? t('player.exitFullscreen') : t('player.enterFullscreen')}
+          aria-pressed={isFullscreen}
+          className="rounded-full p-2 text-foreground transition-colors hover:text-primary"
+        >
+          {isFullscreen ? (
+            <MinimizeIcon size={18} strokeWidth={1.5} />
+          ) : (
+            <MaximizeIcon size={18} strokeWidth={1.5} />
+          )}
+        </button>
       </div>
     </div>
   );
