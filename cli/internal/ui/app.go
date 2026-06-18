@@ -10,16 +10,18 @@ import (
 
 type tickMsg time.Time
 
-// Model is the root Bubble Tea model. For now it only tracks the current time
-// and the terminal size used to center the view.
+// Model is the root Bubble Tea model: the current time, the terminal size used
+// to center the view, and the radio menu state.
 type Model struct {
 	now           time.Time
 	width, height int
+	cursor        int
+	selected      int
 }
 
-// New returns the initial model.
+// New returns the initial model with no audio selected.
 func New() Model {
-	return Model{now: time.Now()}
+	return Model{now: time.Now(), selected: len(stations) - 1}
 }
 
 // Init starts the clock ticking.
@@ -34,7 +36,7 @@ func tick() tea.Cmd {
 	})
 }
 
-// Update advances the clock, tracks the window size and handles quit keys.
+// Update advances the clock, tracks the window size and drives the radio menu.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tickMsg:
@@ -48,18 +50,30 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "esc", "ctrl+c":
 			return m, tea.Quit
+		case "up", "k":
+			if m.cursor > 0 {
+				m.cursor--
+			}
+		case "down", "j":
+			if m.cursor < len(stations)-1 {
+				m.cursor++
+			}
+		case "enter", " ":
+			m.selected = m.cursor
 		}
 	}
 	return m, nil
 }
 
-// View renders the styled clock, centered in the terminal.
+// View renders the styled clock and radio menu, centered in the terminal.
 func (m Model) View() string {
 	content := lipgloss.JoinVertical(
 		lipgloss.Center,
 		clockStyle.Render(m.now.Format("15:04:05")),
 		"",
-		hintStyle.Render("q to quit"),
+		m.renderMenu(),
+		"",
+		hintStyle.Render("↑/↓ choose · enter select · q quit"),
 	)
 
 	if m.width == 0 || m.height == 0 {
