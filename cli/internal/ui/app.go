@@ -6,22 +6,34 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+
+	"github.com/JoaoVictorVM/focuzen/cli/internal/audio"
 )
 
 type tickMsg time.Time
 
+type playbackMsg struct {
+	err error
+}
+
 // Model is the root Bubble Tea model: the current time, the terminal size used
-// to center the view, and the radio menu state.
+// to center the view, the radio menu state and the audio player.
 type Model struct {
 	now           time.Time
 	width, height int
 	cursor        int
 	selected      int
+	player        audio.Player
+	err           error
 }
 
 // New returns the initial model with no audio selected.
-func New() Model {
-	return Model{now: time.Now(), selected: len(stations) - 1}
+func New(player audio.Player) Model {
+	return Model{
+		now:      time.Now(),
+		selected: len(stations) - 1,
+		player:   player,
+	}
 }
 
 // Init starts the clock ticking.
@@ -36,12 +48,29 @@ func tick() tea.Cmd {
 	})
 }
 
+// playSelected plays (or stops) the selected station off the UI goroutine so a
+// slow network request never blocks rendering.
+func (m Model) playSelected() tea.Cmd {
+	player := m.player
+	target := stations[m.selected]
+	return func() tea.Msg {
+		if target.url == "" {
+			player.Stop()
+			return playbackMsg{}
+		}
+		return playbackMsg{err: player.Play(target.url)}
+	}
+}
+
 // Update advances the clock, tracks the window size and drives the radio menu.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tickMsg:
 		m.now = time.Time(msg)
 		return m, tick()
+	case playbackMsg:
+		m.err = msg.err
+		return m, nil
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
@@ -60,6 +89,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "enter", " ":
 			m.selected = m.cursor
+			m.err = nil
+			return m, m.playSelected()
 		}
 	}
 	return m, nil
@@ -67,14 +98,18 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // View renders the styled clock and radio menu, centered in the terminal.
 func (m Model) View() string {
-	content := lipgloss.JoinVertical(
-		lipgloss.Center,
+	sections := []string{
 		clockStyle.Render(m.now.Format("15:04:05")),
 		"",
 		m.renderMenu(),
 		"",
 		hintStyle.Render("↑/↓ choose · enter select · q quit"),
-	)
+	}
+	if m.err != nil {
+		sections = append(sections, hintStyle.Render("could not play audio"))
+	}
+
+	content := lipgloss.JoinVertical(lipgloss.Center, sections...)
 
 	if m.width == 0 || m.height == 0 {
 		return content

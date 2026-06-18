@@ -7,12 +7,21 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/JoaoVictorVM/focuzen/cli/internal/audio"
 	"github.com/JoaoVictorVM/focuzen/cli/internal/ui"
 )
 
 func main() {
-	if _, err := tea.NewProgram(ui.New(), tea.WithAltScreen()).Run(); err != nil {
+	if err := run(); err != nil {
 		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
+}
+
+func run() error {
+	player := audio.NewBeepPlayer()
+	defer player.Stop()
+
+	_, err := tea.NewProgram(ui.New(player), tea.WithAltScreen()).Run()
+	return err
 }

@@ -2,18 +2,19 @@ package ui
 
 import "github.com/charmbracelet/lipgloss"
 
-// station is a selectable background sound. The stream URL is added when audio
-// playback is wired (Beep), in a later step.
+// station is a selectable background sound. An empty url means "no audio".
 type station struct {
 	name string
+	url  string
 }
 
-// stations lists the background sounds plus a final "no audio" option.
+// stations lists the background sounds plus a final "no audio" option. The URLs
+// are stable SomaFM MP3 streams as a starting point — swap them freely.
 var stations = []station{
-	{name: "Lofi Hip Hop"},
-	{name: "Jazz Café"},
-	{name: "Rain & Thunder"},
-	{name: "No audio"},
+	{name: "Lofi Hip Hop", url: "https://ice1.somafm.com/groovesalad-128-mp3"},
+	{name: "Jazz Café", url: "https://ice1.somafm.com/secretagent-128-mp3"},
+	{name: "Ambient", url: "https://ice1.somafm.com/dronezone-128-mp3"},
+	{name: "No audio", url: ""},
 }
 
 // renderMenu draws the station list, marking the cursor and the selected item.
