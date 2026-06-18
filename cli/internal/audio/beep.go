@@ -16,6 +16,9 @@ import (
 const (
 	sampleRate      = beep.SampleRate(44100)
 	resampleQuality = 4
+	// Icecast/SHOUTcast servers drop connections from the default Go user agent,
+	// so we send an explicit one.
+	userAgent = "Focuzen/1.0"
 )
 
 // BeepPlayer streams MP3 audio through Beep and the system speaker. Only one
@@ -42,6 +45,8 @@ func (p *BeepPlayer) Play(streamURL string) error {
 	if err != nil {
 		return fmt.Errorf("audio: build request: %w", err)
 	}
+	req.Header.Set("User-Agent", userAgent)
+
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("audio: request failed: %w", err)
