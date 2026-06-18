@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,6 +19,7 @@ function renderControls(overrides: Partial<Parameters<typeof AudioControls>[0]> 
     isPlaying: false,
     volume: 70,
     repeat: false,
+    muted: false,
     hasNext: true,
     hasPrevious: true,
     isFullscreen: false,
@@ -26,6 +27,7 @@ function renderControls(overrides: Partial<Parameters<typeof AudioControls>[0]> 
     onNext: vi.fn(),
     onPrevious: vi.fn(),
     onToggleRepeat: vi.fn(),
+    onToggleMute: vi.fn(),
     onToggleFullscreen: vi.fn(),
     onVolumeChange: vi.fn(),
     ...overrides,
@@ -46,6 +48,7 @@ describe('AudioControls', () => {
         isPlaying={false}
         volume={70}
         repeat={false}
+        muted={false}
         hasNext={false}
         hasPrevious={false}
         isFullscreen={false}
@@ -53,6 +56,7 @@ describe('AudioControls', () => {
         onNext={vi.fn()}
         onPrevious={vi.fn()}
         onToggleRepeat={vi.fn()}
+        onToggleMute={vi.fn()}
         onToggleFullscreen={vi.fn()}
         onVolumeChange={vi.fn()}
       />,
@@ -116,11 +120,22 @@ describe('AudioControls', () => {
     expect(screen.getByRole('button', { name: 'Exit fullscreen' })).toBeInTheDocument();
   });
 
-  it('reports volume changes', () => {
-    const props = renderControls();
-    fireEvent.change(screen.getByRole('slider', { name: 'Volume' }), {
-      target: { value: '40' },
-    });
-    expect(props.onVolumeChange).toHaveBeenCalledWith(40);
+  it('toggles mute and swaps the icon label', async () => {
+    const props = renderControls({ muted: false });
+    await userEvent.click(screen.getByRole('button', { name: 'Mute' }));
+    expect(props.onToggleMute).toHaveBeenCalledOnce();
+
+    cleanup();
+
+    renderControls({ muted: true });
+    expect(screen.getByRole('button', { name: 'Unmute' })).toBeInTheDocument();
+  });
+
+  it('reports volume changes from the keyboard', async () => {
+    const props = renderControls({ volume: 70 });
+    const slider = screen.getByRole('slider', { name: 'Volume' });
+    slider.focus();
+    await userEvent.keyboard('{ArrowRight}');
+    expect(props.onVolumeChange).toHaveBeenCalledWith(75);
   });
 });

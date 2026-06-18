@@ -15,6 +15,7 @@ export function usePlayer() {
   const [index, setIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(DEFAULT_VOLUME);
+  const [muted, setMuted] = useState(false);
   const [repeat, setRepeat] = useState(false);
 
   const current = queue[index] ?? null;
@@ -125,6 +126,23 @@ export function usePlayer() {
   const changeVolume = useCallback((value: number) => {
     setVolume(value);
     playerRef.current?.setVolume(value);
+    // Bringing the volume up should bring the sound back.
+    if (value > 0) {
+      setMuted(false);
+      playerRef.current?.unMute();
+    }
+  }, []);
+
+  const toggleMute = useCallback(() => {
+    setMuted((value) => {
+      const next = !value;
+      if (next) {
+        playerRef.current?.mute();
+      } else {
+        playerRef.current?.unMute();
+      }
+      return next;
+    });
   }, []);
 
   const toggleRepeat = useCallback(() => {
@@ -136,6 +154,7 @@ export function usePlayer() {
     current,
     isPlaying,
     volume,
+    muted,
     repeat,
     hasNext,
     hasPrevious,
@@ -143,6 +162,7 @@ export function usePlayer() {
     next,
     previous,
     togglePlay,
+    toggleMute,
     toggleRepeat,
     changeVolume,
   } as const;

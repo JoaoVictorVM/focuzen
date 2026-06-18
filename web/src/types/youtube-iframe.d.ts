@@ -37,6 +37,8 @@ declare namespace YT {
     loadVideoById(videoId: string): void;
     setVolume(volume: number): void;
     getVolume(): number;
+    mute(): void;
+    unMute(): void;
     getPlayerState(): PlayerState;
     destroy(): void;
   }

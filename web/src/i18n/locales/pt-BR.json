@@ -25,6 +25,8 @@
     "repeatOff": "Repetição desativada",
     "enterFullscreen": "Tela cheia",
     "exitFullscreen": "Sair da tela cheia",
+    "mute": "Mutar",
+    "unmute": "Desmutar",
     "volume": "Volume"
   },
   "footer": {

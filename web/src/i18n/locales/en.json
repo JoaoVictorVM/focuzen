@@ -25,6 +25,8 @@
     "repeatOff": "Repeat off",
     "enterFullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
+    "mute": "Mute",
+    "unmute": "Unmute",
     "volume": "Volume"
   },
   "footer": {

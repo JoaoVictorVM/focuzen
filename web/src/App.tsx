@@ -25,6 +25,7 @@ export default function App() {
             isPlaying={player.isPlaying}
             volume={player.volume}
             repeat={player.repeat}
+            muted={player.muted}
             hasNext={player.hasNext}
             hasPrevious={player.hasPrevious}
             isFullscreen={isFullscreen}
@@ -32,6 +33,7 @@ export default function App() {
             onNext={player.next}
             onPrevious={player.previous}
             onToggleRepeat={player.toggleRepeat}
+            onToggleMute={player.toggleMute}
             onToggleFullscreen={toggleFullscreen}
             onVolumeChange={player.changeVolume}
           />

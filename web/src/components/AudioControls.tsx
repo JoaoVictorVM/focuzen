@@ -4,6 +4,7 @@ import type { Video } from '../types/youtube';
 import {
   MaximizeIcon,
   MinimizeIcon,
+  MuteIcon,
   NextIcon,
   PauseIcon,
   PlayIcon,
@@ -12,12 +13,14 @@ import {
   VolumeIcon,
 } from './icons';
 import { Tooltip } from './Tooltip';
+import { VolumeControl } from './VolumeControl';
 
 type AudioControlsProps = {
   current: Video | null;
   isPlaying: boolean;
   volume: number;
   repeat: boolean;
+  muted: boolean;
   hasNext: boolean;
   hasPrevious: boolean;
   isFullscreen: boolean;
@@ -25,6 +28,7 @@ type AudioControlsProps = {
   onNext: () => void;
   onPrevious: () => void;
   onToggleRepeat: () => void;
+  onToggleMute: () => void;
   onToggleFullscreen: () => void;
   onVolumeChange: (value: number) => void;
 };
@@ -34,6 +38,7 @@ export function AudioControls({
   isPlaying,
   volume,
   repeat,
+  muted,
   hasNext,
   hasPrevious,
   isFullscreen,
@@ -41,6 +46,7 @@ export function AudioControls({
   onNext,
   onPrevious,
   onToggleRepeat,
+  onToggleMute,
   onToggleFullscreen,
   onVolumeChange,
 }: AudioControlsProps) {
@@ -57,6 +63,34 @@ export function AudioControls({
       </span>
 
       <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onToggleFullscreen}
+          aria-label={isFullscreen ? t('player.exitFullscreen') : t('player.enterFullscreen')}
+          aria-pressed={isFullscreen}
+          className="rounded-full p-2 text-foreground transition-colors hover:text-primary"
+        >
+          {isFullscreen ? (
+            <MinimizeIcon size={18} strokeWidth={1.5} />
+          ) : (
+            <MaximizeIcon size={18} strokeWidth={1.5} />
+          )}
+        </button>
+
+        <Tooltip label={repeat ? t('player.repeatOn') : t('player.repeatOff')}>
+          <button
+            type="button"
+            onClick={onToggleRepeat}
+            aria-label={t('player.repeat')}
+            aria-pressed={repeat}
+            className={`rounded-full p-2 transition-colors ${
+              repeat ? 'text-primary' : 'text-foreground hover:text-primary'
+            }`}
+          >
+            <RepeatIcon size={18} strokeWidth={1.5} />
+          </button>
+        </Tooltip>
+
         <button
           type="button"
           onClick={onPrevious}
@@ -91,46 +125,21 @@ export function AudioControls({
           <NextIcon size={18} strokeWidth={1.5} />
         </button>
 
-        <Tooltip label={repeat ? t('player.repeatOn') : t('player.repeatOff')}>
-          <button
-            type="button"
-            onClick={onToggleRepeat}
-            aria-label={t('player.repeat')}
-            aria-pressed={repeat}
-            className={`rounded-full p-2 transition-colors ${
-              repeat ? 'text-primary' : 'text-foreground hover:text-primary'
-            }`}
-          >
-            <RepeatIcon size={18} strokeWidth={1.5} />
-          </button>
-        </Tooltip>
-
-        <span className="flex items-center gap-2">
-          <VolumeIcon size={16} strokeWidth={1.5} className="text-muted" />
-          <input
-            type="range"
-            min={0}
-            max={100}
-            value={volume}
-            onChange={(event) => onVolumeChange(Number(event.target.value))}
-            aria-label={t('player.volume')}
-            className="h-1 w-24 cursor-pointer accent-primary"
-          />
-        </span>
-
         <button
           type="button"
-          onClick={onToggleFullscreen}
-          aria-label={isFullscreen ? t('player.exitFullscreen') : t('player.enterFullscreen')}
-          aria-pressed={isFullscreen}
+          onClick={onToggleMute}
+          aria-label={muted ? t('player.unmute') : t('player.mute')}
+          aria-pressed={muted}
           className="rounded-full p-2 text-foreground transition-colors hover:text-primary"
         >
-          {isFullscreen ? (
-            <MinimizeIcon size={18} strokeWidth={1.5} />
+          {muted ? (
+            <MuteIcon size={18} strokeWidth={1.5} />
           ) : (
-            <MaximizeIcon size={18} strokeWidth={1.5} />
+            <VolumeIcon size={18} strokeWidth={1.5} />
           )}
         </button>
+
+        <VolumeControl volume={volume} onChange={onVolumeChange} />
       </div>
     </div>
   );
