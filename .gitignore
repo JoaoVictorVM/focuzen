@@ -14,6 +14,7 @@ Thumbs.db
 *.out
 /server/server
 /cli/focus
+/cli/dist/
 go.work.sum
 
 # SPA build embedded into the server binary (generated at build time)

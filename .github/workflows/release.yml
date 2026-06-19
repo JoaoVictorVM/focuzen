@@ -1,0 +1,72 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  # Build the CLI natively on each OS — the audio layer uses CGO, so we never
+  # cross-compile from a single machine (see ADR/CGO notes). Each job uploads its
+  # archive and checksum to the release for the pushed tag.
+  release:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            goos: linux
+            ext: ""
+          - os: macos-latest
+            goos: darwin
+            ext: ""
+          - os: windows-latest
+            goos: windows
+            ext: ".exe"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: Install audio dev headers (Linux CGO)
+        if: matrix.goos == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+      - name: Build
+        shell: bash
+        working-directory: cli
+        env:
+          GOWORK: off
+          CGO_ENABLED: "1"
+        run: |
+          mkdir -p dist
+          go build -trimpath -ldflags "-s -w" -o "dist/focus${{ matrix.ext }}" ./cmd/focus
+      - name: Package and checksum
+        shell: bash
+        working-directory: cli
+        run: |
+          version="${GITHUB_REF_NAME}"
+          goarch="$(go env GOARCH)"
+          base="focus_${version}_${{ matrix.goos }}_${goarch}"
+          cd dist
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            7z a "${base}.zip" "focus${{ matrix.ext }}" >/dev/null
+            archive="${base}.zip"
+          else
+            tar -czf "${base}.tar.gz" "focus${{ matrix.ext }}"
+            archive="${base}.tar.gz"
+          fi
+          if command -v sha256sum >/dev/null; then
+            sha256sum "${archive}" > "${archive}.sha256"
+          else
+            shasum -a 256 "${archive}" > "${archive}.sha256"
+          fi
+          echo "ARCHIVE=cli/dist/${archive}" >> "$GITHUB_ENV"
+          echo "CHECKSUM=cli/dist/${archive}.sha256" >> "$GITHUB_ENV"
+      - name: Upload to the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.ARCHIVE }}
+            ${{ env.CHECKSUM }}
