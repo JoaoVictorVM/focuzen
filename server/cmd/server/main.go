@@ -48,6 +48,7 @@ func run() error {
 		Handler: server.New(logger, searcher, server.Options{
 			RateLimitRequests: cfg.RateLimitRequests,
 			RateLimitWindow:   cfg.RateLimitWindow,
+			DownloadURL:       cfg.DownloadURL,
 		}, spa),
 		ReadHeaderTimeout: 10 * time.Second,
 	}

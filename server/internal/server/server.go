@@ -18,6 +18,7 @@ import (
 type Options struct {
 	RateLimitRequests int
 	RateLimitWindow   time.Duration
+	DownloadURL       string
 }
 
 // New builds the HTTP handler with the base middleware stack and routes. The spa
@@ -34,6 +35,7 @@ func New(logger *slog.Logger, searcher youtube.Searcher, opts Options, spa http.
 	// throttled.
 	r.Get("/healthz", handlers.Healthz)
 	r.Get("/readyz", handlers.Readyz)
+	r.Get("/download", handlers.Download(opts.DownloadURL))
 
 	searchHandler := handlers.NewSearchHandler(searcher)
 	r.Route("/api/v1", func(r chi.Router) {

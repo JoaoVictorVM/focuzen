@@ -8,6 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://localhost:8080',
+      '/download': 'http://localhost:8080',
     },
   },
 });

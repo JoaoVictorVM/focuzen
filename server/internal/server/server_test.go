@@ -24,7 +24,7 @@ func TestRoutes(t *testing.T) {
 	handler := New(
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 		stubSearcher{},
-		Options{RateLimitRequests: 100, RateLimitWindow: time.Minute},
+		Options{RateLimitRequests: 100, RateLimitWindow: time.Minute, DownloadURL: "https://example.com/releases"},
 		nil,
 	)
 
@@ -35,6 +35,7 @@ func TestRoutes(t *testing.T) {
 	}{
 		{"healthz wired", "/healthz", http.StatusOK},
 		{"readyz wired", "/readyz", http.StatusOK},
+		{"download redirects", "/download", http.StatusFound},
 		{"search wired", "/api/v1/search?q=lofi", http.StatusOK},
 		{"search without query is 400", "/api/v1/search", http.StatusBadRequest},
 		{"unknown route returns 404", "/does-not-exist", http.StatusNotFound},

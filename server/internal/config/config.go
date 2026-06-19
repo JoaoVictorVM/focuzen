@@ -17,6 +17,7 @@ type Config struct {
 	CacheTTL          time.Duration
 	RateLimitRequests int
 	RateLimitWindow   time.Duration
+	DownloadURL       string
 }
 
 // Load reads configuration from environment variables, applying defaults and
@@ -49,6 +50,7 @@ func Load() (Config, error) {
 		CacheTTL:          cacheTTL,
 		RateLimitRequests: rateLimitRequests,
 		RateLimitWindow:   rateLimitWindow,
+		DownloadURL:       getenv("DOWNLOAD_URL", "https://github.com/JoaoVictorVM/focuzen/releases/latest"),
 	}
 
 	if cfg.YouTubeAPIKey == "" {

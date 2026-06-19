@@ -57,6 +57,20 @@ func TestLoad(t *testing.T) {
 		assert.Equal(t, 30*time.Minute, cfg.CacheTTL)
 	})
 
+	t.Run("applies default download url and allows override", func(t *testing.T) {
+		t.Setenv("YOUTUBE_API_KEY", "test-key")
+		t.Setenv("DOWNLOAD_URL", "")
+
+		cfg, err := Load()
+		require.NoError(t, err)
+		assert.Contains(t, cfg.DownloadURL, "github.com/JoaoVictorVM/focuzen/releases")
+
+		t.Setenv("DOWNLOAD_URL", "https://example.com/dl")
+		cfg, err = Load()
+		require.NoError(t, err)
+		assert.Equal(t, "https://example.com/dl", cfg.DownloadURL)
+	})
+
 	t.Run("rejects invalid cache size", func(t *testing.T) {
 		t.Setenv("YOUTUBE_API_KEY", "test-key")
 		t.Setenv("CACHE_SIZE", "not-a-number")
