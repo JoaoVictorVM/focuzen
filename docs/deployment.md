@@ -1,7 +1,7 @@
-# Infra — Render (Blueprint)
+# Deploy — Render (Blueprint)
 
 Hospedagem do Focuzen na [Render](https://render.com) (free web service, **sem cartão**;
-ver [ADR-0009](../docs/adr/0009-hospedagem-render.md)). A infra é declarada no
+ver [ADR-0009](adr/0009-hospedagem-render.md)). A infra é declarada no
 [`render.yaml`](../render.yaml) na raiz do repositório (Render Blueprint): um web service
 que builda o `Dockerfile` (SPA embarcada no binário Go), com health check em `/healthz`.
 
