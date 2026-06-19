@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.32.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - name: Audit (informational)
+        run: pnpm audit --prod --audit-level high
+        continue-on-error: true
+      - name: Upload built SPA for the server embed
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: web/dist
+
+  go:
+    needs: web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.26"
+      - name: Install audio dev headers (CGO for the CLI)
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev
+      - name: Restore the built SPA into the embed directory
+        uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: server/internal/webui/dist
+      - name: Check formatting
+        run: test -z "$(gofmt -l server cli)"
+      - name: Install golangci-lint
+        run: curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b "$(go env GOPATH)/bin"
+      - name: Lint
+        run: |
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          (cd server && golangci-lint run ./...)
+          (cd cli && golangci-lint run ./...)
+      - name: Test
+        run: |
+          (cd server && go test -race -cover ./...)
+          (cd cli && go test -race -cover ./...)
+      - name: Build
+        run: |
+          (cd server && CGO_ENABLED=0 go build ./...)
+          (cd cli && CGO_ENABLED=1 go build ./...)
+      - name: Vulnerability check
+        run: |
+          go install golang.org/x/vuln/cmd/govulncheck@latest
+          export PATH="$(go env GOPATH)/bin:$PATH"
+          (cd server && govulncheck ./...)
+          (cd cli && govulncheck ./...)
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t focuzen:ci .
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: focuzen:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
