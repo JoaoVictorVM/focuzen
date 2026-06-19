@@ -1,0 +1,15 @@
+# Build artifacts and deps (regenerated inside the image)
+**/node_modules
+**/dist
+/bin
+
+# Not needed to build the container image
+.git
+.github
+.vscode
+.idea
+cli
+docs
+infra
+*.md
+*_test.go

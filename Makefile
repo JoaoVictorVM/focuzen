@@ -1,6 +1,7 @@
 WEBUI_DIST := server/internal/webui/dist
+IMAGE ?= focuzen:local
 
-.PHONY: web embed build test lint clean
+.PHONY: web embed build test lint clean docker-build docker-run
 
 # Build the SPA and copy it into the server's embed directory.
 web:
@@ -26,3 +27,11 @@ lint:
 
 clean:
 	rm -rf web/dist $(WEBUI_DIST) bin
+
+# Build the production container image (SPA + server, distroless, non-root).
+docker-build:
+	docker build -t $(IMAGE) .
+
+# Run the image locally (expects YOUTUBE_API_KEY in the environment).
+docker-run:
+	docker run --rm -p 8080:8080 -e YOUTUBE_API_KEY=$(YOUTUBE_API_KEY) $(IMAGE)
