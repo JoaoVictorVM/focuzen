@@ -1,17 +1,34 @@
-name: Release
+name: release-please
 
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
-  # Build the CLI natively on each OS — the audio layer uses CGO, so we never
-  # cross-compile from a single machine (see ADR/CGO notes). Each job uploads its
-  # archive and checksum to the release for the pushed tag.
-  release:
+  # Maintains a release PR from Conventional Commits; on merge it tags the
+  # version and creates the GitHub release with an auto-generated changelog.
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.rp.outputs['.--release_created'] }}
+      tag_name: ${{ steps.rp.outputs['.--tag_name'] }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: rp
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  # When a release is cut, build the CLI natively per OS (CGO, no cross-compile)
+  # and attach the archives + checksums to that release. Done in the same
+  # workflow because GITHUB_TOKEN-created tags do not trigger other workflows.
+  release-cli:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
     strategy:
       matrix:
         include:
@@ -45,10 +62,11 @@ jobs:
       - name: Package and checksum
         shell: bash
         working-directory: cli
+        env:
+          VERSION: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          version="${GITHUB_REF_NAME}"
           goarch="$(go env GOARCH)"
-          base="focus_${version}_${{ matrix.goos }}_${goarch}"
+          base="focus_${VERSION}_${{ matrix.goos }}_${goarch}"
           cd dist
           if [ "${{ matrix.goos }}" = "windows" ]; then
             7z a "${base}.zip" "focus${{ matrix.ext }}" >/dev/null
@@ -67,6 +85,7 @@ jobs:
       - name: Upload to the GitHub release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.release-please.outputs.tag_name }}
           files: |
             ${{ env.ARCHIVE }}
             ${{ env.CHECKSUM }}
