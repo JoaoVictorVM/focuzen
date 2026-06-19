@@ -1,50 +1,33 @@
-# Infra — Koyeb (Terraform)
+# Infra — Render (Blueprint)
 
-Provisiona o Focuzen na [Koyeb](https://www.koyeb.com) (free tier, sem cartão, sem
-sleep — ver [ADR-0002](../docs/adr/0002-hospedagem-koyeb.md)): um `koyeb_app` e um
-`koyeb_service` que roda a imagem Docker, com a chave da YouTube API guardada como
-**secret**.
+Hospedagem do Focuzen na [Render](https://render.com) (free web service, **sem cartão**;
+ver [ADR-0009](../docs/adr/0009-hospedagem-render.md)). A infra é declarada no
+[`render.yaml`](../render.yaml) na raiz do repositório (Render Blueprint): um web service
+que builda o `Dockerfile` (SPA embarcada no binário Go), com health check em `/healthz`.
 
-## Pré-requisitos
+> Trade-off: o free tier **hiberna** após ~15 min de inatividade (cold start ~30-60s).
 
-- [Terraform](https://developer.hashicorp.com/terraform/install) >= 1.6.
-- Um token de API da Koyeb, exportado no ambiente:
+## Setup (uma vez)
 
-  ```sh
-  export KOYEB_TOKEN="seu-token"
-  ```
+1. Em [dashboard.render.com](https://dashboard.render.com), **New → Blueprint** e conecte
+   este repositório. A Render lê o `render.yaml` e cria o serviço.
+2. No serviço, em **Environment**, defina o secret **`YOUTUBE_API_KEY`** (está como
+   `sync: false` no blueprint, então não vem versionado).
+3. Em **Settings → Deploy Hook**, copie a URL do hook.
+4. No GitHub, crie o repository secret **`RENDER_DEPLOY_HOOK_URL`** com essa URL.
 
-- A imagem publicada num registry acessível (ex.: GitHub Container Registry).
+## Deploy
 
-## Uso
+`autoDeploy` está **desligado** no blueprint; os deploys são disparados pelo workflow de
+CD ([`.github/workflows/cd.yml`](../.github/workflows/cd.yml)) em push na `main`, que
+chama o Deploy Hook. A Render builda o `Dockerfile` e publica a nova versão.
 
-```sh
-cd infra
-terraform init
+Para um deploy manual: rode o workflow **CD** (aba Actions → Run workflow) ou bata na URL
+do hook (`curl -fsS "$RENDER_DEPLOY_HOOK_URL"`).
 
-# Crie um arquivo de variáveis a partir do exemplo (NÃO commitado):
-cp example.tfvars prod.tfvars   # edite image e youtube_api_key
+## Variáveis de ambiente
 
-terraform plan  -var-file=prod.tfvars
-terraform apply -var-file=prod.tfvars
-```
-
-A URL pública (`https://<app>-<org>.koyeb.app`) aparece no dashboard da Koyeb após
-o deploy.
-
-## Variáveis
-
-| Variável | Obrigatória | Default | Descrição |
-|---|---|---|---|
-| `image` | sim | — | Imagem do container a implantar. |
-| `youtube_api_key` | sim | — | Chave da YouTube Data API v3 (vira secret na Koyeb). |
-| `app_name` | não | `focuzen` | Nome do app. |
-| `service_name` | não | `focuzen` | Nome do service. |
-| `region` | não | `was` | Região da Koyeb. |
-
-## Notas
-
-- **Segredos**: `youtube_api_key` é `sensitive` e vira um `koyeb_secret`; nunca vai
-  para a imagem. Arquivos `*.tfvars` e o state são gitignored.
-- **Health check**: HTTP em `/healthz` na porta 8080.
-- **Escala**: uma instância sempre ligada (`min = max = 1`) no tipo `free`.
+| Variável | Onde | Descrição |
+|---|---|---|
+| `YOUTUBE_API_KEY` | secret na Render | Chave da YouTube Data API v3 (obrigatória). |
+| `PORT` | injetada pela Render | A app escuta na porta que a Render define. |

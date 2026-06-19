@@ -1,8 +1,12 @@
 # Hospedagem do backend na Koyeb
 
-- Status: aceito
+- Status: substituído por [ADR-0009](0009-hospedagem-render.md)
 - Data: 2026-06-16
 - Decisores: João Victor Ventura Martins
+
+> **Substituído (2026-06-18):** a Koyeb removeu o free tier sem cartão e passou a
+> exigir cartão de crédito (Pro plan ~US$30/mês). Isso invalida a premissa central
+> desta decisão. A hospedagem migrou para a Render — ver [ADR-0009](0009-hospedagem-render.md).
 
 ## Contexto e problema
 

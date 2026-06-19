@@ -13,7 +13,7 @@ O foco está na qualidade de engenharia (testes, segurança, CI/CD, IaC, documen
 - **Web**: React + TypeScript (strict) + TailwindCSS + Vite.
 - **Backend**: Go + chi + `log/slog` — serve a SPA (`embed.FS`) e o proxy de busca do YouTube.
 - **CLI**: Go + Bubble Tea + Lip Gloss + Beep.
-- **Infra**: Docker (distroless) + Terraform (Koyeb). CLI distribuída via GitHub Releases.
+- **Infra**: Docker (distroless) + Render (Blueprint via `render.yaml`). CLI distribuída via GitHub Releases.
 
 Monorepo com dois módulos Go (`server/` sem CGO, `cli/` com CGO) ligados por `go.work`,
 além do frontend em `web/`.

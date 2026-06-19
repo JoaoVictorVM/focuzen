@@ -1,0 +1,17 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec). Free web service that
+# builds the multi-stage Dockerfile (SPA embedded into the Go binary).
+services:
+  - type: web
+    name: focuzen
+    runtime: docker
+    plan: free
+    region: virginia
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    # Deploys are triggered by the CD workflow via a deploy hook.
+    autoDeploy: false
+    envVars:
+      # Set the value in the Render dashboard; never committed.
+      - key: YOUTUBE_API_KEY
+        sync: false
